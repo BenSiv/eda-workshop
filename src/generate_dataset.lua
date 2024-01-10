@@ -1,6 +1,8 @@
 -- generate dataset for exploratory data analysis workshop
 
 using("dates")
+using("dataframes")
+local writedlm = require("delimited_files").writedlm
 
 local function get_salary(min, max)
     local salary = math.random(min, max)
@@ -62,30 +64,46 @@ local function does_expend(person)
     return expend
 end
 
-function generate_month(person, initial_balance, year, month)
+local function generate_month(person, initial_balance, year, month)
     local data = {
         Id = {},
         In = {},
         Out = {},
         Balance = {}
     }
+
     local balance = initial_balance
     local day = 1
+    local initial_date = os.date("%Y-%m-%d", os.time{year=year, month=month, day=day})
+    local salary_date = os.date("%Y-%m-%d", os.time{year=year, month=month, day=person.salary_day})
     local current_date = os.date("%Y-%m-%d", os.time{year=year, month=month, day=day})
-    while get_month(current_date) == month do
+
+    while get_month(current_date) == get_month(initial_date) do
         local balance_in = 0
         local balance_out = 0
-        table.insert(data.Id, person.id)
-        if get_day(current_date) == person.salary_day then
+        insert(data.Id, person.id)
+
+        if get_day(current_date) == get_day(salary_date) then
             balance_in = person.salary
-            table.insert(data.In, balance_in)
+            insert(data.In, balance_in)
+        else
+            balance_in = 0
+            insert(data.In, balance_in)
         end
-        if does_expend() then
+
+        if get_day(current_date) == "10" then
+            balance_out = get_major_expense(person.expenses_range, person.major_expenses_factor)
+            insert(data.Out, balance_out)
+        elseif does_expend(person) then
             balance_out = get_expense(person.expenses_range)
-            table.insert(data.out, balance_out)
+            insert(data.Out, balance_out)
+        else
+            balance_out = 0
+            insert(data.Out, balance_out)
         end
-        balance = balance - balance_out + balance_out
-        table.insert(data.balance, balance)
+
+        balance = balance - balance_out + balance_in
+        insert(data.Balance, balance)
         day = day + 1
         current_date = os.date("%Y-%m-%d", os.time{year=year, month=month, day=day})
     end
@@ -93,7 +111,29 @@ function generate_month(person, initial_balance, year, month)
     return data
 end
 
-function main()
-    local person = get_person()
-    generate_month(person, 1000, 2024, 1)
+local function concat_month_data(n, year, month)
+    local concatenated_data = {}
+
+    for i = 1, n do
+        local person = get_person(n)
+        local data = generate_month(person, 1000, year, month)
+
+        -- Concatenate the data to the result table
+        for _, entry in ipairs(data) do
+            table.insert(concatenated_data, entry)
+        end
+    end
+
+    return concatenated_data
 end
+
+
+function main()
+    local person = get_person(1)
+    local data = generate_month(person, 1000, 2024, 1)
+    -- local data = concat_month_data(5, 2024, 1)
+    writedlm("/home/bensiv/Documents/eda-workshop/data/transactions.csv", ",", transpose(data), true)
+end
+
+-- runnnig script
+main()
