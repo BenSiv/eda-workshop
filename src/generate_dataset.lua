@@ -34,19 +34,19 @@ local function get_major_expense(expenses_range, factor)
 end
 
 -- the probability to make an expence each day
-local function get_expense_probability()
-    local expense_probability = math.random()
+local function get_expense_probability(min, max)
+    local expense_probability = math.random(min, max)
     return expense_probability
 end
 
-local function get_person(id)
+local function get_person(id, min_salary, max_salary)
     -- define a person
     local person = {
         id = id,
-        salary = get_salary(8000, 20000),
+        salary = get_salary(min_salary, max_salary),
         salary_day = get_salary_day(),
         expenses_range = get_expenses_range(),
-        expense_probability = get_expense_probability(),
+        expense_probability = get_expense_probability(0.3, 0.7),
         major_expenses_factor = math.random(2, 10)
     }
 
@@ -67,6 +67,7 @@ end
 local function generate_month(person, initial_balance, year, month)
     local data = {
         Id = {},
+        Date = {},
         In = {},
         Out = {},
         Balance = {}
@@ -82,6 +83,7 @@ local function generate_month(person, initial_balance, year, month)
         local balance_in = 0
         local balance_out = 0
         insert(data.Id, person.id)
+        insert(data.Date, current_date)
 
         if get_day(current_date) == get_day(salary_date) then
             balance_in = person.salary
@@ -111,28 +113,35 @@ local function generate_month(person, initial_balance, year, month)
     return data
 end
 
-local function concat_month_data(n, year, month)
-    local concatenated_data = {}
-
-    for i = 1, n do
-        local person = get_person(n)
-        local data = generate_month(person, 1000, year, month)
-
-        -- Concatenate the data to the result table
-        for _, entry in ipairs(data) do
-            table.insert(concatenated_data, entry)
+local function generate_data(months, peoples, min_salary, max_salary, initial_balance, initial_year, output_file)
+    local first_loop = true
+    for m = 1, months do
+        for p = 1, peoples do
+            local person = get_person(p, min_salary, max_salary)
+            local data = generate_month(person, initial_balance, initial_year, m)
+            if first_loop then
+                first_loop = false
+                -- writedlm(filename, delimiter, data, header, append)
+                writedlm(output_file, "\t", transpose(data), true, false)
+            else
+                -- writedlm(filename, delimiter, data, header, append)
+                writedlm(output_file, "\t", transpose(data), false, true)
+            end
         end
     end
-
-    return concatenated_data
 end
 
-
-function main()
-    local person = get_person(1)
-    local data = generate_month(person, 1000, 2024, 1)
-    -- local data = concat_month_data(5, 2024, 1)
-    writedlm("/home/bensiv/Documents/eda-workshop/data/transactions.csv", ",", transpose(data), true)
+local function main()
+    local params = read_yaml("params.yaml")
+    generate_data(
+        params.months,
+        params.people,
+        params.min_salary,
+        params.max_salary,
+        params.initial_balance,
+        params.initial_year,
+        "data/transactions.tsv"
+    )
 end
 
 -- runnnig script
