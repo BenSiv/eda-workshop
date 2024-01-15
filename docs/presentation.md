@@ -54,6 +54,32 @@ https://flavorsofcacao.com/chocolate_database.html
 ---
 
 ### Dataset: Flavors Of Cacao
+### Questions
+1. What is the origin of the best cocoa beans
+
+---
+
+### Dataset: Flavors Of Cacao
+### Questions
+1. What is the origin of the best cocoa beans
+2. What are the flavors that makes the best chocolate
+
+---
+
+### Dataset: Flavors Of Cacao
+### Questions
+1. What is the origin of the best cocoa beans
+2. What are the flavors that makes the best chocolate
+3. What ingredients go into the best chocolate
+
+---
+
+### Hands-on
+![width:30.2px height:25.2px](images/cocoa-bean.png) Open **eda-workshop/src/eda_cocoa.ipynb** 
+
+---
+
+### Data schema
 ![Organized schema](images/taste_of_cocoa_schema.png)
 
 ---
