@@ -1,0 +1,31 @@
+// taste of cocoa
+
+Table Samples{
+  sample_id number
+  ref_code varchar(255)
+  companie varchar(255)
+  bean_origin varchar(255)
+  bar_name varchar(255)
+  ingredients varchar(255)
+  cocoa_percent number
+  rating decimal
+}
+
+Table References{
+  ref_code varchar(255)
+  year Date
+}
+
+Table Companies{
+  name varchar(255)
+  location varchar(255)
+}
+
+Table Tastes {
+  sample_id number
+  characteristic varchar(255)
+}
+
+Ref: Samples.sample_id < Tastes.sample_id
+Ref: Samples.ref_code > References.ref_code
+Ref: Samples.companie < Companies.name
